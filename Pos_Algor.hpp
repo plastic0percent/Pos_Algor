@@ -49,6 +49,14 @@ template <typename ValueType> class Motion_State
     // Update displacement from GPS
     void add_displacement(ValueType dx, ValueType dy);
 
+    // Getters for direct data
+    ValueType get_last_ax();
+    ValueType get_last_ay();
+    ValueType get_last_az();
+    ValueType get_last_gyx();
+    ValueType get_last_gyy();
+    ValueType get_last_gyz();
+
     // --- EXPORTED DATA ---
     // Tilt with respect to x,y,z axes, in radians.
     // These are affected by neither turns nor pitching. i.e.,
@@ -164,6 +172,15 @@ void Motion_State<ValueType>::end_x_direction_test()
     _operation_state = Motion_State_State::Operational;
 }
 
+#define defun_getter(name, valname)                                            \
+    template <typename ValueType>                                              \
+    ValueType Motion_State<ValueType>::get_last_##name()                       \
+    {                                                                          \
+        return (_prev_##valname)[_phase ^ 1];                                  \
+    }
+defun_getter(ax, x_accel) defun_getter(ay, y_accel) defun_getter(az, z_accel)
+    defun_getter(gyx, x_ang_velo) defun_getter(gyy, y_ang_velo)
+        defun_getter(gyz, z_ang_velo)
 // Add MPU6050 readings according to the state
 template <typename ValueType>
 void Motion_State<ValueType>::add_data(ValueType phy_ax, ValueType phy_ay,
