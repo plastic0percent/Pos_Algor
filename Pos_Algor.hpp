@@ -181,12 +181,12 @@ void Motion_State<ValueType>::end_x_direction_test()
 defun_getter(ax, x_accel) defun_getter(ay, y_accel) defun_getter(az, z_accel)
     defun_getter(gyx, x_ang_velo) defun_getter(gyy, y_ang_velo)
         defun_getter(gyz, z_ang_velo)
-// Add MPU6050 readings according to the state
-template <typename ValueType>
-void Motion_State<ValueType>::add_data(ValueType phy_ax, ValueType phy_ay,
-                                       ValueType phy_az, ValueType phy_gyx,
-                                       ValueType phy_gyy, ValueType phy_gyz,
-                                       unsigned long time_now)
+    // Add MPU6050 readings according to the state
+    template <typename ValueType>
+    void Motion_State<ValueType>::add_data(ValueType phy_ax, ValueType phy_ay,
+                                           ValueType phy_az, ValueType phy_gyx,
+                                           ValueType phy_gyy, ValueType phy_gyz,
+                                           unsigned long time_now)
 {
     switch (_operation_state)
     {
@@ -244,10 +244,10 @@ void Motion_State<ValueType>::_do_add_data_rest_test(
 // 2. Distributing latency of all operations
 #define update_accel(dir)                                                      \
     _tmp_##dir##_accel =                                                       \
-        (_tmp_data_idx * (_tmp_data_idx - 1) + phy_a##dir) / _tmp_data_idx
+        (_tmp_##dir##_accel * (_tmp_data_idx - 1) + phy_a##dir) / _tmp_data_idx
 #define update_gyros(dir)                                                      \
     _tmp_##dir##_ang_velo =                                                    \
-        (_tmp_data_idx * (_tmp_data_idx - 1) + phy_gy##dir) / _tmp_data_idx
+        (_tmp_##dir##_ang_velo * (_tmp_data_idx - 1) + phy_gy##dir) / _tmp_data_idx
     ++_tmp_data_idx;
     update_accel(x);
     update_accel(y);
@@ -265,12 +265,12 @@ void Motion_State<ValueType>::_do_add_data_x_test(
 
 {
     /* TODO */
-    (void) phy_ax;
-    (void) phy_ay;
-    (void) phy_az;
-    (void) phy_gyx;
-    (void) phy_gyy;
-    (void) phy_gyz;
+    (void)phy_ax;
+    (void)phy_ay;
+    (void)phy_az;
+    (void)phy_gyx;
+    (void)phy_gyy;
+    (void)phy_gyz;
 }
 
 template <typename XType, typename YType, typename ResultType>
