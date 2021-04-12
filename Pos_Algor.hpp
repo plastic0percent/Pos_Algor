@@ -178,15 +178,19 @@ void Motion_State<ValueType>::end_x_direction_test()
     {                                                                          \
         return (_prev_##valname)[_phase ^ 1];                                  \
     }
-defun_getter(ax, x_accel) defun_getter(ay, y_accel) defun_getter(az, z_accel)
-    defun_getter(gyx, x_ang_velo) defun_getter(gyy, y_ang_velo)
-        defun_getter(gyz, z_ang_velo)
-    // Add MPU6050 readings according to the state
-    template <typename ValueType>
-    void Motion_State<ValueType>::add_data(ValueType phy_ax, ValueType phy_ay,
-                                           ValueType phy_az, ValueType phy_gyx,
-                                           ValueType phy_gyy, ValueType phy_gyz,
-                                           unsigned long time_now)
+defun_getter(ax, x_accel);
+defun_getter(ay, y_accel);
+defun_getter(az, z_accel);
+defun_getter(gyx, x_ang_velo);
+defun_getter(gyy, y_ang_velo);
+defun_getter(gyz, z_ang_velo);
+
+// Add MPU6050 readings according to the state
+template <typename ValueType>
+void Motion_State<ValueType>::add_data(ValueType phy_ax, ValueType phy_ay,
+                                       ValueType phy_az, ValueType phy_gyx,
+                                       ValueType phy_gyy, ValueType phy_gyz,
+                                       unsigned long time_now)
 {
     switch (_operation_state)
     {
@@ -212,9 +216,10 @@ void Motion_State<ValueType>::_do_add_data_operational(
     ValueType phy_gyy, ValueType phy_gyz, unsigned long time_now)
 
 {
-    float ax = abs(phy_ax) * cos(y_tilt) * cos(z_tilt),
-          ay = abs(phy_ay) * cos(x_tilt) * cos(z_tilt),
-          az = abs(phy_az) * cos(x_tilt) * cos(z_tilt);
+    /* First, remove the gravity. Then, project onto the constructed axes */
+    float ax = (phy_ax - cos(y_tilt) * _g) * cos(y_tilt) * cos(z_tilt),
+          ay = (phy_ay - cos(z_tilt) * _g) * cos(x_tilt) * cos(z_tilt),
+          az = (phy_az - cos(x_tilt) * _g) * cos(x_tilt) * cos(z_tilt);
     // TODO here: Kalman filter
     if (_phase == 2)
     {
@@ -244,10 +249,12 @@ void Motion_State<ValueType>::_do_add_data_rest_test(
 // 2. Distributing latency of all operations
 #define update_accel(dir)                                                      \
     _tmp_##dir##_accel =                                                       \
-        (_tmp_##dir##_accel * (_tmp_data_idx - 1) + phy_a##dir) / _tmp_data_idx
+        (_tmp_##dir##_accel * (_tmp_data_idx - 1) + phy_a##dir) /              \
+        _tmp_data_idx
 #define update_gyros(dir)                                                      \
     _tmp_##dir##_ang_velo =                                                    \
-        (_tmp_##dir##_ang_velo * (_tmp_data_idx - 1) + phy_gy##dir) / _tmp_data_idx
+        (_tmp_##dir##_ang_velo * (_tmp_data_idx - 1) + phy_gy##dir) /          \
+        _tmp_data_idx
     ++_tmp_data_idx;
     update_accel(x);
     update_accel(y);
